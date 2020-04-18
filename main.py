@@ -22,8 +22,8 @@ class Kobot(discord.Client):
             for user in self.timer:
                 try:
                     if self.timer[user] != "pause":
-                        print(self.timer[user])
                         self.timer[user] += 1
+                        print(self.timer[user])
                 except TypeError:
                     pass
             await asyncio.sleep(1)
@@ -32,7 +32,7 @@ class Kobot(discord.Client):
         self.base_channel = self.get_channel(self.base_channel_id)
         asyncio.ensure_future(self.count_time())
         print('Successfully Logged in')
-        await self.base_channel.send("log in")
+        #await self.base_channel.send("log in")
 
 
     async def on_message(self, message):
@@ -111,5 +111,5 @@ class Kobot(discord.Client):
 
 if __name__ == "__main__":
     TOKEN = os.environ["KOBOT_TOKEN"]
-    KOBOT = Kobot(TOKEN, base_channel_id=700920193580531712)
+    KOBOT = Kobot(TOKEN, base_channel_id=701058219111612427)
     KOBOT.launch()
