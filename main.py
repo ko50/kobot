@@ -38,7 +38,7 @@ class Kobot(discord.Client):
             await message.channel.send('is power')
             return
 
-        if message.content[0]=="!":
+        if message.content[0]=="*":
             await self.valid_command(message, message.author)
             return
 
@@ -49,6 +49,20 @@ class Kobot(discord.Client):
         user_order = message.content[1:].split()
         command = user_order[0]
         print("from:    {}\ncommand: {}".format(message.author, user_order))
+        if command == "preface":
+            await message.channel.send("\
+***Kobot Self Introduction***\n\
+**・Commands**\n\
+```\
+*timer ユーザーごとに割り当てられるストップウオッチで時間が測れます\n\
+    |-- start\n\
+    |-- stop\n\
+    |-- preview\n\
+    |-- pause\n\
+```\n\
+まだこれしかできないけど増えるかもしれません\n\
+            ")
+
         if command == "timer":
             if len(user_order) < 2:
                 await message.channel.send(user.mention + "\n入力エラーだよ")
