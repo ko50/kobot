@@ -10,7 +10,6 @@ class Kobot(discord.Client):
         self.token = token
         self.base_channel_id = base_channel_id
         self.timer = {}
-        self.timezone = 9
 
         self.base_channel = None
 
@@ -19,20 +18,16 @@ class Kobot(discord.Client):
 
     async def count_time(self):
         while True:
-            for user in self.timer:
-                try:
-                    if self.timer[user] != "pause":
-                        self.timer[user] += 1
-                        print(self.timer[user])
-                except TypeError:
-                    pass
+            for user, time in self.timer.items():
+                if type(time) == int:
+                    self.timer[user] += 1
+                    print("{}: {}".format(user, time))
             await asyncio.sleep(1)
 
     async def on_ready(self):
         self.base_channel = self.get_channel(self.base_channel_id)
         asyncio.ensure_future(self.count_time())
         print('Successfully Logged in')
-        #await self.base_channel.send("log in")
 
 
     async def on_message(self, message):
@@ -44,7 +39,6 @@ class Kobot(discord.Client):
             return
 
         if message.content[0]=="!":
-            #if message.content == '*timer start':
             await self.valid_command(message, message.author)
             return
 
@@ -54,42 +48,70 @@ class Kobot(discord.Client):
         """
         user_order = message.content[1:].split()
         command = user_order[0]
-        print(user_order)
+        print("from:    {}\ncommand: {}".format(message.author, user_order))
         if command == "timer":
             if len(user_order) < 2:
-                await message.channel.send("なにかがおかしい")
+                await message.channel.send(user.mention + "\n入力エラーだよ")
                 return
             await self.personal_timer(user_order[1], message)
             return
 
     async def personal_timer(self, order_type: str, message: discord.Message):
+        """
+        ユーザーごとにストップウォッチ式で時間計測できる
+        """
         user = message.author
         channel = message.channel
         if not user in self.timer:
-            self.timer[user] = "pause"
+            self.timer[user] = "stop"
         user_time = self.timer[user]
 
         if order_type == "start":
-            if user_time == "pause":
+            if user_time == "stop":
                 self.timer[user] = 0
                 await channel.send(user.mention + "\nタイマーをスタートしたよ")
+            elif type(user_time) == int:
+                await channel.send(user.mention + "\nタイマーは既にスタートしているよ")
             else:
-                await channel.send("タイマーは既にスタートしているよ")
+                user_time = int(user_time[5:])
+                self.timer[user] = user_time
+                time = self.format_time(user_time)
+                await channel.send(user.mention + "\nタイマーを経過時間 {} から再スタートしたよ".format(time))
+
         elif order_type == "stop":
-            if user_time == "panse":
-                await channel.send("タイマーはスタートしていないよ")
-            else:
+            if user_time == "stop":
+                await channel.send(user.mention + "\nタイマーは動いてないよ")
+            elif type(user_time) == int:
                 time = self.format_time(user_time)
-                await channel.send(user.mention + "\nタイマーを止めたよ。\n経過時間は {} だよ".format(time))
-                self.timer[user] = "pause"
+                await channel.send(user.mention + "\nタイマーを停止したよ。\n経過時間は {} だよ".format(time))
+                self.timer[user] = "stop"
+            else:
+                user_time = int(user_time[5:])
+                time = self.format_time(user_time)
+                await channel.send(user.mention + "\nタイマーを停止したよ。\n経過時間は {} だよ".format(time))
+                self.timer[user] = "stop"
+
         elif order_type == "preview":
-            if user_time == "pause":
-                await channel.send("タイマーはスタートしていないよ")
-            else:
+            if user_time == "stop":
+                await channel.send(user.mention + "\nタイマーは動いてないから経過時間は0秒だよ")
+            elif type(user_time) == int:
                 time = self.format_time(user_time)
-                await channel.send(user.mention + "\nタイマーの今時点での経過時間は {} だよ".format(time))
+                await channel.send(user.mention + "\nタイマーの現時点での経過時間は {} だよ".format(time))
+            else:
+                user_time = int(user_time[5:])
+                time = self.format_time(user_time)
+                await channel.send(user.mention + "\nタイマーは経過時間 {} で停止中だよ".format(time))
+
+        elif order_type == "pause":
+            if type(user_time) == int:
+                time = self.format_time(user_time)
+                await channel.send(user.mention + "\nタイマーを経過時間 {} で一時停止したよ".format(time))
+                self.timer[user] = "pause" + str(user_time)
+            else:
+                await channel.send(user.mention + "\nタイマーは動いてないよ")
+
         else:
-            await channel.send("なにかがおかしい")
+            await channel.send(user.mention + "\n入力エラーだよ")
         return
 
     def format_time(self, second):
