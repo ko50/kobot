@@ -4,6 +4,23 @@ import discord
 import asyncio
 import datetime
 
+INTRODUCTION = \
+"\
+***Kobot Self Introduction***\n\
+**・Commands**\n\
+```\
+*timer :ユーザーごとに割り当てられるストップウオッチ\n\
+    |-- start\n\
+    |-- stop\n\
+    |-- preview\n\
+    |-- pause\n\
+\n\
+*status <メンション> :メンションしたユーザーの状態を表示\n\
+\n\
+```\n\
+まだこれしかできないけど増えるかもしれません\n\
+"
+
 class Kobot(discord.Client):
     def __init__(self, token, base_channel_id):
         super(Kobot, self).__init__()
@@ -50,24 +67,27 @@ class Kobot(discord.Client):
         command = user_order[0]
         print("from:    {}\ncommand: {}".format(message.author, user_order))
         if command == "preface":
-            await message.channel.send("\
-***Kobot Self Introduction***\n\
-**・Commands**\n\
-```\
-*timer ユーザーごとに割り当てられるストップウオッチで時間が測れます\n\
-    |-- start\n\
-    |-- stop\n\
-    |-- preview\n\
-    |-- pause\n\
-```\n\
-まだこれしかできないけど増えるかもしれません\n\
-            ")
+            await message.channel.send(INTRODUCTION)
+            return
 
         if command == "timer":
             if len(user_order) < 2:
                 await message.channel.send(user.mention + "\n入力エラーだよ")
                 return
             await self.personal_timer(user_order[1], message)
+            return
+
+        if command == "status":
+            if len(user_order) < 2 or user_order[1][1] != "@":
+                await message.channel.send(user.mention + "\n入力エラーだよ")
+                return
+            mentioned_user_id = user_order[1][3:-1]
+            for guild_user in message.guild.members:
+                if mentioned_user_id == str(guild_user.id):
+                    await message.channel.send("ユーザーID: {} の状態は {} です".format(mentioned_user_id, guild_user.status))
+                    return
+            await message.channel.send(user.mention + "\nそんな人ここにはいないです")
+            print(message.content)
             return
 
     async def personal_timer(self, order_type: str, message: discord.Message):
