@@ -171,7 +171,7 @@ class Kobot(discord.Client):
             result += " : "
         return result[:12]
 
-    def play_ilm(self, vc_client):
+    async def play_ilm(self, vc_client):
         if not vc_client:
             return
         audio_source = discord.FFmpegPCMAudio("！？！？！？！？！？！？！！？！？！.mp3")
