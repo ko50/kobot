@@ -179,5 +179,5 @@ class Kobot(discord.Client):
 
 if __name__ == "__main__":
     TOKEN = os.environ["KOBOT_TOKEN"]
-    KOBOT = Kobot(TOKEN, base_channel_id=701058219111612427)
+    KOBOT = Kobot(TOKEN, base_channel_id=701058219111612427, base_vc_id=70092001447536234)
     KOBOT.launch()
