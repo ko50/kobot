@@ -41,6 +41,7 @@ class Kobot(discord.Client):
 
     async def on_ready(self):
         self.base_channel = self.get_channel(self.base_channel_id)
+        self.base_vc = self.get_channel(self.base_vc_id)
         asyncio.ensure_future(self.count_time())
         print('Successfully Logged in')
 
@@ -56,10 +57,9 @@ class Kobot(discord.Client):
         if "とは" in message.content:
             message.content
 
-        if ("!?" in message.content or "！？" in message.content) and len(self.base_vc_id.members)>=1:
-            await self.base_vc_id.connect
-            vc_client = message.guild.voice_client
-            await self.play(vc_client)
+        if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=1:
+            await self.base_vc.connect()
+            await self.play_ilm(self.base_vc)
 
         if message.content[0]=="*":
             await self.valid_command(message, message.author)
@@ -171,7 +171,7 @@ class Kobot(discord.Client):
             result += " : "
         return result[:12]
 
-    def play(self, vc_client):
+    def play_ilm(self, vc_client):
         if not vc_client:
             return
         audio_source = discord.FFmpegPCMAudio("！？！？！？！？！？！？！！？！？！.mp3")
@@ -179,5 +179,5 @@ class Kobot(discord.Client):
 
 if __name__ == "__main__":
     TOKEN = os.environ["KOBOT_TOKEN"]
-    KOBOT = Kobot(TOKEN, base_channel_id=701058219111612427, base_vc_id=70092001447536234)
+    KOBOT = Kobot(TOKEN, base_channel_id=701058219111612427, base_vc_id=700920014475362348)
     KOBOT.launch()
