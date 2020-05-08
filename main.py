@@ -58,7 +58,7 @@ class Kobot(discord.Client):
         if "とは" in message.content:
             message.content
 
-        if "!?" in message.content and len(self.base_vc_id.members)>=2:
+        if "!?" in message.content and len(self.base_vc_id.members)>=1:
             await self.base_vc_id.content
             vc_client = message.guild.voice_client
             await self.play(vc_client)
