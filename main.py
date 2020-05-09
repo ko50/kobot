@@ -56,9 +56,8 @@ class Kobot(discord.Client):
         if "とは" in message.content:
             message.content
 
-        if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=1:
+        if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=2:
             await message.channel.send("！？！？！？！？！？！？！！？！？")
-            
             vc_client = await self.base_vc.connect()
             await self.play_ilm(vc_client)
 
