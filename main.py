@@ -57,8 +57,9 @@ class Kobot(discord.Client):
             message.content
 
         if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=1:
+            await message.channel.send("！？！？！？！？！？！？！！？！？")
+            
             vc_client = await self.base_vc.connect()
-            await message.channel.send("VCに侵入成功")
             await self.play_ilm(vc_client)
 
         if message.content[0]=="*":
