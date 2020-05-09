@@ -174,7 +174,7 @@ class Kobot(discord.Client):
     async def play_ilm(self, vc_client):
         if not vc_client:
             return
-        audio_source = discord.FFmpegPCMAudio("！？！？！？！？！？！？！！？！？！.mp3")
+        audio_source = discord.FFmpegPCMAudio("assets/！？！？！？！？！？！？！！？！？！.mp3")
         vc_client.play(audio_source)
         await asyncio.sleep(11)
         await vc_client.disconnect(force=True)
