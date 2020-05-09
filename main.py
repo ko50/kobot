@@ -58,7 +58,8 @@ class Kobot(discord.Client):
 
         if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=1:
             vc_client = await self.base_vc.connect()
-            self.play_ilm(vc_client)
+            await message.channel.send("VCに侵入成功")
+            await self.play_ilm(vc_client)
 
         if message.content[0]=="*":
             await self.valid_command(message, message.author)
@@ -175,7 +176,7 @@ class Kobot(discord.Client):
             return
         audio_source = discord.FFmpegPCMAudio("！？！？！？！？！？！？！！？！？！.mp3")
         vc_client.play(audio_source)
-        await asyncio.sleep(10.5)
+        await asyncio.sleep(11)
         await vc_client.disconnect(force=True)
 
 if __name__ == "__main__":
