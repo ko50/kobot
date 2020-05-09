@@ -1,4 +1,3 @@
-from re import match
 import os
 import discord
 import asyncio
@@ -7,13 +6,13 @@ import datetime
 INTRODUCTION = \
 "\
 ```\
-*timer :ユーザーごとに割り当てられるストップウオッチ\n\
+*timer subcommand :ユーザーごとに割り当てられるストップウオッチ\n\
     |-- start\n\
     |-- stop\n\
     |-- preview\n\
     |-- pause\n\
 \n\
-*status <メンション> :メンションしたユーザーの状態を表示\n\
+*status メンション :メンションしたユーザーの状態を表示\n\
 \n\
 ```\n\
 "
@@ -58,8 +57,8 @@ class Kobot(discord.Client):
             message.content
 
         if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=1:
-            await self.base_vc.connect()
-            await self.play_ilm(self.base_vc)
+            vc_client = await self.base_vc.connect()
+            self.play_ilm(vc_client)
 
         if message.content[0]=="*":
             await self.valid_command(message, message.author)
@@ -72,7 +71,7 @@ class Kobot(discord.Client):
         user_order = message.content[1:].split()
         command = user_order[0]
         print("from:    {}\ncommand: {}".format(message.author, user_order))
-        if command == "preface":
+        if command == "info":
             await message.channel.send(INTRODUCTION)
             return
 
@@ -176,6 +175,8 @@ class Kobot(discord.Client):
             return
         audio_source = discord.FFmpegPCMAudio("！？！？！？！？！？！？！！？！？！.mp3")
         vc_client.play(audio_source)
+        await asyncio.sleep(10.5)
+        await vc_client.disconnect(force=True)
 
 if __name__ == "__main__":
     TOKEN = os.environ["KOBOT_TOKEN"]
