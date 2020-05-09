@@ -2,10 +2,10 @@ import os
 import discord
 import asyncio
 import datetime
+import json
 
 INTRODUCTION = \
-"\
-```\
+"```\
 *timer subcommand :ユーザーごとに割り当てられるストップウオッチ\n\
     |-- start\n\
     |-- stop\n\
@@ -14,8 +14,7 @@ INTRODUCTION = \
 \n\
 *status メンション :メンションしたユーザーの状態を表示\n\
 \n\
-```\n\
-"
+```\n"
 
 class Kobot(discord.Client):
     def __init__(self, token, base_channel_id, base_vc_id):
@@ -65,12 +64,19 @@ class Kobot(discord.Client):
             await self.valid_command(message, message.author)
             return
 
+#        with open("kobot/assets/typo.json", encoding="utf-8") as t:
+#            model_typo_list = json.load(t)["typo"]
+#        for model_typo in model_typo_list:
+#            if model_typo in message.content:
+#                await message.channel.send("typoしましたね？カス")
+
     async def valid_command(self, message: discord.Message, user: discord.Client.user):
         """
         メッセージがコマンドとして入力された場合、実行される
         """
         user_order = message.content[1:].split()
-        command = user_order[0]
+        command     = user_order[0]
+        other_order = user_order[1:]
         print("from:    {}\ncommand: {}".format(message.author, user_order))
         if command == "info":
             await message.channel.send(INTRODUCTION)
@@ -95,6 +101,12 @@ class Kobot(discord.Client):
             await message.channel.send(user.mention + "\nそんな人ここにはいないです")
             print(message.content)
             return
+
+#        if command == "add":
+#            if other_order[0] == "typo" and len(other_order) >= 2:
+#                typo = " ".join(other_order[1:])
+#                self.add_typo(typo)
+#                await message.channel.send("typo {} をtypo listに追加".format(typo))
 
     async def personal_timer(self, order_type: str, message: discord.Message):
         """
@@ -179,7 +191,19 @@ class Kobot(discord.Client):
         await asyncio.sleep(11)
         await vc_client.disconnect(force=True)
 
+    def add_typo(self, new_typo):
+        with open("kobot/assets/typo.json", encoding="utf-8") as t:
+            model_typo_list = json.load(t)["typo"]
+            if new_typo in model_typo_list:
+                return
+        model_typo_list.append(new_typo)
+        print(new_typo)
+        print(model_typo_list)
+        new_json = "{\"typo\": " + str(model_typo_list) + "}"
+        with open("kobot/assets/typo.json", "w", encoding="utf-8") as t:
+            t.write(new_json)
+
 if __name__ == "__main__":
     TOKEN = os.environ["KOBOT_TOKEN"]
-    KOBOT = Kobot(TOKEN, base_channel_id=701058219111612427, base_vc_id=700920014475362348)
+    KOBOT = Kobot(TOKEN, base_channel_id=701058219111612427, base_vc_id=683939861539192865)
     KOBOT.launch()
