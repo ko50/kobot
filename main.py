@@ -56,9 +56,10 @@ class Kobot(discord.Client):
             message.content
 
         if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=2:
-            await message.channel.send("！？！？！？！？！？！？！！？！？")
-            vc_client = await self.base_vc.connect()
-            await self.play_ilm(vc_client)
+            await self.play_bgm(message, "！？！？！？！？！？！？！！？！？", "assets/！？！？！？！？！？！？！！？！？.mp3")
+
+        if ("??" in message.content or "？？" in message.content) and len(self.base_vc.members)>=2:
+            await self.play_bgm(message, "？？？？？？？？？？？？？？？？？？", "assets/？？？？？？？？？？？？？？？？？？.mp3")
 
         if message.content[0]=="*":
             await self.valid_command(message, message.author)
@@ -183,10 +184,12 @@ class Kobot(discord.Client):
             result += " : "
         return result[:12]
 
-    async def play_ilm(self, vc_client):
+    async def play_bgm(self, message: discord.Message, with_message: str, source_path: str):
+        await message.channel.send(with_message)
+        vc_client = await self.base_vc.connect()
         if not vc_client:
             return
-        audio_source = discord.FFmpegPCMAudio("assets/！？！？！？！？！？！？！！？！？！.mp3")
+        audio_source = discord.FFmpegPCMAudio(source_path)
         vc_client.play(audio_source)
         await asyncio.sleep(11)
         await vc_client.disconnect(force=True)
