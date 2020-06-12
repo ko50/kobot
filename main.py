@@ -1,8 +1,10 @@
 import os
-import discord
 import asyncio
 import datetime
 import json
+import discord
+
+from stop_watch import StopWatch
 
 INTRODUCTION = \
 "```\
@@ -22,25 +24,23 @@ class Kobot(discord.Client):
         self.token = token
         self.base_channel_id = base_channel_id
         self.base_vc_id = base_vc_id
-        self.timer = {}
 
-        self.base_channel = None
+        self.stop_watch_list = []
 
     def launch(self):
         self.run(self.token)
 
-    async def count_time(self):
+    async def increase_stop_watch_count(self):
         while True:
-            for user, time in self.timer.items():
-                if type(time) == int:
-                    self.timer[user] += 1
-                    print("{}: {}".format(user, time))
+            if self.stop_watch_list:
+                for i in range(len(self.stop_watch_list)):
+                    self.stop_watch_list[i].increment()
             await asyncio.sleep(1)
 
     async def on_ready(self):
         self.base_channel = self.get_channel(self.base_channel_id)
         self.base_vc = self.get_channel(self.base_vc_id)
-        asyncio.ensure_future(self.count_time())
+        asyncio.ensure_future(self.increase_stop_watch_count())
         print('Successfully Logged in')
 
 
@@ -53,15 +53,14 @@ class Kobot(discord.Client):
             return
 
         if "とは" in message.content:
-            message.content
+            pass # TODO 実装
 
-        if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=2:
-            await self.play_bgm(message, "！？！？！？！？！？！？！！？！？", "assets/！？！？！？！？！？！？！！？！？.mp3")
-
+        if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=2: # 収容
+            await self.play_bgm(message, "！？！？！？！？！？！？！！？！？", "assets/！？！？！？！？！？！？！！？！？！.mp3") 
         if ("??" in message.content or "？？" in message.content) and len(self.base_vc.members)>=2:
             await self.play_bgm(message, "？？？？？？？？？？？？？？？？？？", "assets/？？？？？？？？？？？？？？？？？？.mp3")
 
-        if message.content[0]=="*":
+        if message.content.startswith("*"):
             await self.valid_command(message, message.author)
             return
 
@@ -85,11 +84,24 @@ class Kobot(discord.Client):
 
         if command == "timer":
             if len(user_order) < 2:
-                await message.channel.send(user.mention + "\n入力エラー")
+                await message.channel.send("<@!{}>\n入力エラー".format(message.author.id))
                 return
-            await self.personal_timer(user_order[1], message)
+
+            index = -1
+
+            for i in range(len(self.stop_watch_list)):
+                sw = self.stop_watch_list[i]
+                if message.author.id == sw.user_id:
+                    index = i
+                    break
+            if index == -1:
+                self.stop_watch_list.append(StopWatch(message.author.id))
+                index = len(self.stop_watch_list) - 1
+
+            await self.stop_watch_list[index].call_stop_watch(user_order[1], message.channel)
             return
 
+# TODO
         if command == "status":
             if len(user_order) < 2 or user_order[1][1] != "@":
                 await message.channel.send(user.mention + "\n入力エラー")
@@ -109,89 +121,15 @@ class Kobot(discord.Client):
 #                self.add_typo(typo)
 #                await message.channel.send("typo {} をtypo listに追加".format(typo))
 
-    async def personal_timer(self, order_type: str, message: discord.Message):
-        """
-        ユーザーごとにストップウォッチ式で時間計測できる
-        """
-        user = message.author
-        channel = message.channel
-        if not user in self.timer:
-            self.timer[user] = "stop"
-        user_time = self.timer[user]
-
-        if order_type == "start":
-            if user_time == "stop":
-                self.timer[user] = 0
-                await channel.send(user.mention + "\nタイマーをスタートしました")
-            elif type(user_time) == int:
-                await channel.send(user.mention + "\nタイマーは既にスタートしています")
-            else:
-                user_time = int(user_time[5:])
-                self.timer[user] = user_time
-                time = self.format_time(user_time)
-                await channel.send(user.mention + "\nタイマーを経過時間 {} から再スタート".format(time))
-
-        elif order_type == "stop":
-            if user_time == "stop":
-                await channel.send(user.mention + "\nタイマーは動いていません")
-            elif type(user_time) == int:
-                time = self.format_time(user_time)
-                await channel.send(user.mention + "\nタイマーを停止しました。\n経過時間は {} ".format(time))
-                self.timer[user] = "stop"
-            else:
-                user_time = int(user_time[5:])
-                time = self.format_time(user_time)
-                await channel.send(user.mention + "\nタイマーを停止しました。\n経過時間は {} ".format(time))
-                self.timer[user] = "stop"
-
-        elif order_type == "preview":
-            if user_time == "stop":
-                await channel.send(user.mention + "\nタイマーは動いてないため経過時間は0秒")
-            elif type(user_time) == int:
-                time = self.format_time(user_time)
-                await channel.send(user.mention + "\nタイマーの現時点での経過時間は {} ".format(time))
-            else:
-                user_time = int(user_time[5:])
-                time = self.format_time(user_time)
-                await channel.send(user.mention + "\nタイマーは経過時間 {} で停止中".format(time))
-
-        elif order_type == "pause":
-            if type(user_time) == int:
-                time = self.format_time(user_time)
-                await channel.send(user.mention + "\nタイマーを経過時間 {} で一時停止".format(time))
-                self.timer[user] = "pause" + str(user_time)
-            else:
-                await channel.send(user.mention + "\nタイマーは動いていません")
-
-        else:
-            await channel.send(user.mention + "\n入力エラー")
-        return
-
-    def format_time(self, second):
-        """
-        クソコード定期
-        """
-        result = ""
-        minute    = second//60
-        second %= 60
-        hour    = minute//60
-        minute    %= 60
-        for it in [hour, minute, second]:
-            if it < 10:
-                result += "0{}".format(it)
-            else:
-                result += str(it)
-            result += " : "
-        return result[:12]
-
     async def play_bgm(self, message: discord.Message, with_message: str, source_path: str):
         await message.channel.send(with_message)
         vc_client = await self.base_vc.connect()
         if not vc_client:
             return
-        audio_source = discord.FFmpegPCMAudio(source_path)
-        vc_client.play(audio_source)
-        await asyncio.sleep(11)
+
+        # audio_source = discord.FFmpegPCMAudio(source_path)
+        # vc_client.play(audio_source)
+        await asyncio.sleep(11) # 曲の長さから取ったほうがいいですよね ハードコーディングやめろ
         await vc_client.disconnect(force=True)
 
     def add_typo(self, new_typo):
