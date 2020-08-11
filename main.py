@@ -8,11 +8,11 @@ from stop_watch import StopWatch
 
 INTRODUCTION = \
 "```\
-*timer subcommand :ユーザーごとに割り当てられるストップウオッチ\n\
-    |-- start\n\
-    |-- stop\n\
-    |-- preview\n\
-    |-- pause\n\
+*timer subcommand :タイマーの皮を被ったストップウオッチ\n\
+    |-- start   :スタート\n\
+    |-- stop    :停止\n\
+    |-- preview :現時点での経過時間を表示\n\
+    |-- pause   :一時停止\n\
 \n\
 *status メンション :メンションしたユーザーの状態を表示\n\
 \n\
@@ -78,7 +78,7 @@ class Kobot(discord.Client):
         command     = user_order[0]
         other_order = user_order[1:]
         print("from:    {}\ncommand: {}".format(message.author, user_order))
-        if command == "info":
+        if command == "help":
             await message.channel.send(INTRODUCTION)
             return
 
@@ -127,8 +127,8 @@ class Kobot(discord.Client):
         if not vc_client:
             return
 
-        # audio_source = discord.FFmpegPCMAudio(source_path)
-        # vc_client.play(audio_source)
+        audio_source = discord.FFmpegPCMAudio(source_path)
+        vc_client.play(audio_source)
         await asyncio.sleep(11) # 曲の長さから取ったほうがいいですよね ハードコーディングやめろ
         await vc_client.disconnect(force=True)
 
