@@ -7,7 +7,7 @@ import discord
 from stop_watch import StopWatch
 
 INTRODUCTION = \
-"```\
+    "```\
 *timer subcommand :タイマーの皮を被ったストップウオッチ\n\
     |-- start   :スタート\n\
     |-- stop    :停止\n\
@@ -17,6 +17,7 @@ INTRODUCTION = \
 *status メンション :メンションしたユーザーの状態を表示\n\
 \n\
 ```\n"
+
 
 class Kobot(discord.Client):
     def __init__(self, token, base_channel_id, base_vc_id):
@@ -43,7 +44,6 @@ class Kobot(discord.Client):
         asyncio.ensure_future(self.increase_stop_watch_count())
         print('Successfully Logged in')
 
-
     async def on_message(self, message):
         if message.author.bot:
             return
@@ -53,11 +53,11 @@ class Kobot(discord.Client):
             return
 
         if "とは" in message.content:
-            pass # TODO 実装
+            pass  # TODO 実装
 
-        if ("!?" in message.content or "！？" in message.content) and len(self.base_vc.members)>=2: # 収容
-            await self.play_bgm(message, "！？！？！？！？！？！？！！？！？", "assets/！？！？！？！？！？！？！！？！？！.mp3") 
-        if ("??" in message.content or "？？" in message.content) and len(self.base_vc.members)>=2:
+        if ("!?" in message.content) or ("！？" in message.content):  # TODO 収容
+            await self.play_bgm(message, "！？！？！？！？！？！？！！？！？", "assets/！？！？！？！？！？！？！！？！？！.mp3")
+        if ("??" in message.content) or ("？？" in message.content):
             await self.play_bgm(message, "？？？？？？？？？？？？？？？？？？", "assets/？？？？？？？？？？？？？？？？？？.mp3")
 
         if message.content.startswith("*"):
@@ -75,7 +75,7 @@ class Kobot(discord.Client):
         メッセージがコマンドとして入力された場合、実行される
         """
         user_order = message.content[1:].split()
-        command     = user_order[0]
+        command = user_order[0]
         other_order = user_order[1:]
         print("from:    {}\ncommand: {}".format(message.author, user_order))
         if command == "help":
@@ -123,13 +123,17 @@ class Kobot(discord.Client):
 
     async def play_bgm(self, message: discord.Message, with_message: str, source_path: str):
         await message.channel.send(with_message)
-        vc_client = await self.base_vc.connect()
+        if not message.author.voice:
+            return
+
+        voice_chan = message.author.voice.channel
+        vc_client = await voice_chan.connect()
         if not vc_client:
             return
 
         audio_source = discord.FFmpegPCMAudio(source_path)
         vc_client.play(audio_source)
-        await asyncio.sleep(11) # 曲の長さから取ったほうがいいですよね ハードコーディングやめろ
+        await asyncio.sleep(11)  # 曲の長さから取ったほうがいいですよね ハードコーディングやめろ
         await vc_client.disconnect(force=True)
 
     def add_typo(self, new_typo):
@@ -144,7 +148,12 @@ class Kobot(discord.Client):
         with open("kobot/assets/typo.json", "w", encoding="utf-8") as t:
             t.write(new_json)
 
+
 if __name__ == "__main__":
     TOKEN = os.environ["KOBOT_TOKEN"]
-    KOBOT = Kobot(TOKEN, base_channel_id=701058219111612427, base_vc_id=683939861539192865)
+    KOBOT = Kobot(
+        TOKEN,
+        base_channel_id=701058219111612427,
+        base_vc_id=683939861539192865
+    )
     KOBOT.launch()
