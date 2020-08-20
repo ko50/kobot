@@ -59,8 +59,7 @@ class Kobot(discord.Client):
             await self.play_bgm(message, "！？！？！？！？！？！？！！？！？", "assets/！？！？！？！？！？！？！！？！？！.mp3")
         if ("??" in message.content) or ("？？" in message.content):
             await self.play_bgm(message, "？？？？？？？？？？？？？？？？？？", "assets/？？？？？？？？？？？？？？？？？？.mp3")
-        if ("!!" in message.content) or ("！！" in message.content):
-            await self.play_bgm(massage, "！！！！！！！！！！！！！！！！", "assets/！！！！！！！！！！！！！！！.mp3")
+
         if message.content.startswith("*"):
             await self.valid_command(message, message.author)
             return
