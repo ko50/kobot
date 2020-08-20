@@ -1,11 +1,16 @@
+from stop_watch import StopWatch 
+
 import os
 import asyncio
 import datetime
 import json
 import discord
 
+<<<<<<< HEAD
 from stop_watch import StopWatch
 
+=======
+>>>>>>> 41e34e3fbd7e3d3bb64a3552cc85058a49c43996
 INTRODUCTION = \
     "```\
 *timer subcommand :タイマーの皮を被ったストップウオッチ\n\
@@ -60,7 +65,8 @@ class Kobot(discord.Client):
         if ("??" in message.content) or ("？？" in message.content):
             await self.play_bgm(message, "？？？？？？？？？？？？？？？？？？", "assets/？？？？？？？？？？？？？？？？？？.mp3")
         if ("!!" in message.content) or ("！！" in message.content):
-            await self.play_bgm(massage, "！！！！！！！！！！！！！！！！", "assets/！！！！！！！！！！！！！！！.mp3")
+            await self.play_bgm(message, "！！！！！！！！！！！！！！！！", "assets/！！！！！！！！！！！！！！！.mp3")
+
         if message.content.startswith("*"):
             await self.valid_command(message, message.author)
             return
