@@ -1,10 +1,10 @@
+from stop_watch import StopWatch 
+
 import os
 import asyncio
 import datetime
 import json
 import discord
-
-from .stop_watch import StopWatch
 
 INTRODUCTION = \
     "```\
